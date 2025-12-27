@@ -1,0 +1,108 @@
+import { VerticalBox, Button } from "std-widgets.slint";
+
+export struct RepositoryData {
+    id: string,
+    name: string,
+    is-active: bool,
+}
+
+// 1. 定義「單一個」Tab 的外觀 (RepoTab)
+// 這就像 React 的 <RepoTab /> Component
+component RepoTab inherits Rectangle {
+    in property <string> name;
+    in property <bool> active;
+    callback clicked;
+
+    // 外觀設定
+    background: root.active ? #ffffff : #f0f0f0; // 根據 active 變色
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #cccccc;
+    min-width: 100px; // 給個最小寬度
+
+    HorizontalLayout {
+        padding: 8px;
+        alignment: center;
+        Text {
+            text: root.name;
+            color: root.active ? #000000 : #666666;
+            font-size: 14px;
+        }
+    }
+
+    // 點擊區域
+    TouchArea {
+        clicked => { root.clicked() }
+    }
+}
+
+component RepoTabs {
+    in property <[RepositoryData]> repositories;
+    in property <string> current-id;
+    
+    // 定義對外事件
+    callback tab-clicked(string);
+
+    HorizontalLayout {
+        spacing: 4px; // 分頁之間的間距
+        alignment: start;
+
+        for repo in root.repositories : RepoTab {
+            name: repo.name;
+            active: repo.id == root.current-id;
+
+            clicked => {
+                root.tab-clicked(repo.id);
+            }
+        }
+        
+        RepoTab {
+            Image {
+                source: @image-url("../assets/icons/plus.svg");
+                width: 16px;
+                height: 16px;
+            }
+                
+            clicked => { 
+                root.tab-clicked("add-repo");
+            }
+        }
+    }
+}
+
+export component Topbar inherits Rectangle {
+    in property <[RepositoryData]> repositories;
+    in property <string> current-id;
+    
+    callback repo-selected(string);
+    callback fetch-clicked();
+    
+    height: 60px;
+    background: #e0e0e0;
+
+    VerticalLayout {
+        padding: 8px;
+        RepoTabs {
+            repositories: root.repositories;
+            current-id: root.current-id;
+            
+            tab-clicked(id) => {
+                // 將子元件的事件轉發給外部
+                root.repo-selected(id);
+                if id == "add-repo" {
+                    debug("click add repo btn");
+                }
+            }
+        }
+
+        VerticalBox {
+            Button {
+                text: "Fetch Origin";
+                clicked => {
+                    // 觸發 fetch-clicked 事件
+                    root.fetch-clicked();
+                }
+            }
+        }
+    }
+}
