@@ -19,10 +19,13 @@ RUN apt-get update && apt-get install -y \
     wget \
     sudo \
     zsh \
+    zsh \
     neovim \
     ripgrep \
     fd-find \
     libfontconfig1-dev \
+    libssl-dev \
+    pkg-config \
     libxcb1-dev \
     libxcb-render0-dev \
     libxcb-shape0-dev \
